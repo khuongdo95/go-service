@@ -1,0 +1,48 @@
+services:
+  mysql:
+    image: mysql:9.3
+    container_name: mysql-server
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-net
+
+  redis:
+    image: redis:7.2
+    container_name: redis-test
+    command: redis-server --requirepass redisabc123
+    ports:
+      - "6380:6379"
+    networks:
+      - app-net
+  user_service:
+    platform: linux/arm64
+    pull_policy: never
+    image: user_service:latest
+    container_name: user_service
+    ports:
+      - "8081"
+    networks:
+      - app-net
+    volumes:
+      - ./service-internal/user:/app
+  # envoy:
+  #   image: envoy/smm-envoy:latest
+  #   container_name: envoy
+  #   ports:
+  #     - "8888:8888"
+  #   networks:
+  #     - app-net
+  #   depends_on:
+  #     - user
+
+networks:
+  app-net:
+    driver: bridge
+volumes:
+  mysql-data:
